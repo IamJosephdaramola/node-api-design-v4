@@ -1,3 +1,3 @@
-import type { ApiRequest, ApiResponse } from './server';
+import type { ApiRequest, ApiResponse, ApiError } from './server';
 
-export type { ApiRequest, ApiResponse };
+export type { ApiRequest, ApiResponse, ApiError };

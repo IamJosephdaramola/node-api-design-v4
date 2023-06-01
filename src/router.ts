@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { body, validationResult, oneOf } from 'express-validator';
+import { body } from 'express-validator';
 import { handleInputErrors } from './modules/middleware';
 import {
 	getOneProduct,

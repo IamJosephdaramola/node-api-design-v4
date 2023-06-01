@@ -1,3 +1,4 @@
+import { NextFunction } from 'express';
 import { prisma } from '../db';
 import type { ApiRequest, ApiResponse } from '../types';
 
@@ -27,31 +28,47 @@ const getOneProduct = async (req: ApiRequest, res: ApiResponse) => {
 	res.status(200).json({ data: product });
 };
 
-const createProduct = async (req: ApiRequest, res: ApiResponse) => {
-	const product = await prisma.product.create({
-		data: {
-			name: req.body.name,
-			belongsToId: req?.user?.id || '',
-		},
-	});
-
-	res.status(201).json({ data: product });
-};
-
-const updateProduct = async (req: ApiRequest, res: ApiResponse) => {
-	const updated = await prisma.product.update({
-		where: {
-			id_belongsToId: {
-				id: req.params.id,
+const createProduct = async (
+	req: ApiRequest,
+	res: ApiResponse,
+	next: NextFunction
+) => {
+	try {
+		const product = await prisma.product.create({
+			data: {
+				name: req.body.name,
 				belongsToId: req?.user?.id || '',
 			},
-		},
-		data: {
-			name: req.body.name,
-		},
-	});
+		});
 
-	res.status(201).json({ data: updated });
+		res.status(201).json({ data: product });
+	} catch (error) {
+		next(error);
+	}
+};
+
+const updateProduct = async (
+	req: ApiRequest,
+	res: ApiResponse,
+	next: NextFunction
+) => {
+	try {
+		const updated = await prisma.product.update({
+			where: {
+				id_belongsToId: {
+					id: req.params.id,
+					belongsToId: req?.user?.id || '',
+				},
+			},
+			data: {
+				name: req.body.name,
+			},
+		});
+
+		res.status(201).json({ data: updated });
+	} catch (error) {
+		next(error);
+	}
 };
 
 const deleteProduct = async (req: ApiRequest, res: ApiResponse) => {

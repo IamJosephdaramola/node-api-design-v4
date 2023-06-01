@@ -1,22 +1,34 @@
+import { NextFunction } from 'express';
 import { prisma } from '../db';
 import { comparePasswords, createJWT, hashPassword } from '../modules/auth';
-import type { ApiRequest, ApiResponse } from '../types';
+import type { ApiRequest, ApiResponse, ApiError } from '../types';
 
-const createNewUser = async (req: ApiRequest, res: ApiResponse) => {
+const createNewUser = async (
+	req: ApiRequest,
+	res: ApiResponse,
+	next: NextFunction
+) => {
 	const { username, password } = req.body;
 
 	const hash = await hashPassword(password);
 
-	const user = await prisma.user.create({
-		data: {
-			username,
-			password: hash,
-		},
-	});
+	try {
+		const user = await prisma.user.create({
+			data: {
+				username,
+				password: hash,
+			},
+		});
+		const token = createJWT(user);
 
-	const token = createJWT(user);
+		res.status(201).json({ token });
+	} catch (error) {
+		const authError = error as ApiError;
 
-	res.status(201).json({ token });
+		authError.type = 'input';
+
+		next(authError);
+	}
 };
 
 const signIn = async (req: ApiRequest, res: ApiResponse) => {
